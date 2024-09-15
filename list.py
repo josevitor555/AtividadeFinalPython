@@ -1,0 +1,11 @@
+lista_cpf = []
+lista_nomes = []
+lista_tipo_contas = []
+lista_saldos = []
+lista_senhas = []
+lista_agencias = []
+historico = []
+
+clientes = []
+contas_corrente = []
+contas_poupanca = []
