@@ -170,9 +170,12 @@ def creditar_conta():
     print('CPF não encontrado. Verifique o CPF e tente novamente.')
     return
   
-  valor_creditado = float(input('Informe valor a ser creditado: '))
-  if not checar_valor(valor_creditado):
-    return
+  try:
+    valor_creditado = float(input('Informe valor a ser creditado: '))
+    if not checar_valor(valor_creditado):
+      return
+  except ValueError as error:
+    print(f'Por favor. Insira apenas número {error}')
   
   conta_atual[2] += valor_creditado
   print(f'Valor de R${valor_creditado} creditado com sucesso na conta de CPF {cpf}.')
@@ -180,12 +183,16 @@ def creditar_conta():
   # registrar_transacao()
 
 def debitar_conta():
-  cpf = input('Informe o CPF da conta a ser creditada: ')
+  cpf = input('Informe o CPF da conta para realizar o saque: ')
   tipo_conta = input('Informe o tipo da conta [corrente/poupanca] a ser debitado: ')
-  valor_debito = float(input('Informe o valor a ser debitado: '))
-  if valor_debito <= 0:
-    print('Valor inválido para débito.')
-    return
+  
+  try:
+    valor_debito = float(input('Informe o valor a ser debitado: '))
+    if valor_debito <= 0:
+      print('Valor inválido para débito.')
+      return
+  except ValueError as error:
+    print(f'Por favor. Insira apenas número {error}')
   
   if not checar_valor(valor_debito):
     return # retorne nada...
@@ -195,7 +202,7 @@ def debitar_conta():
     return
   
   conta_encontrada = False
-  conta_atual = None
+  # conta_atual = None
   
   match tipo_conta:
     case 'corrente':
@@ -277,11 +284,14 @@ def criar_conta_corrente():
     if conta[0] == cpf:
       print(f'O cliente já possui uma conta corrente com CPF {cpf}.')
       return
-    
-  saldo_inicial = float(input("Informe o saldo inicial: "))
-  if saldo_inicial < 0:
-    print("O saldo inicial não pode ser negativo.")
-    return
+  
+  try:  
+    saldo_inicial = float(input("Informe o saldo inicial: "))
+    if saldo_inicial < 0:
+      print("O saldo inicial não pode ser negativo.")
+      return
+  except ValueError as error:
+    print(f'Por favor. Insira apenas número {error}')
   
   conta_corrente = [cpf, nome_titular, saldo_inicial, [], 500, 1000, 0]
   contas_corrente.append(conta_corrente)
@@ -315,11 +325,14 @@ def criar_conta_poupanca():
     if conta[0] == cpf:
       print(f'O cliente já possui uma conta poupança com CPF {cpf}.')
       return
-    
-  saldo_inicial = float(input("Informe o saldo inicial: "))
-  if saldo_inicial < 0:
-    print("O saldo inicial não pode ser negativo.")
-    return
+  
+  try:
+    saldo_inicial = float(input("Informe o saldo inicial: "))
+    if saldo_inicial < 0:
+      print("O saldo inicial não pode ser negativo.")
+      return
+  except ValueError as error:
+    print(f'Por favor. Insira apenas número {error}')
   
   conta_poupanca = [cpf, nome_titular, saldo_inicial, [], 0.02]
   contas_poupanca.append(conta_poupanca)
@@ -379,7 +392,7 @@ def realizar_pix():
   
   match tipo_conta_destino:
     case 'corrente':
-      for conta in contas_poupanca:
+      for conta in contas_corrente:
         if conta[0] == cpf_destino:
           conta_destino_econtrada = True
           conta[2] += valor_pix
