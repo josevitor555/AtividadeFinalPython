@@ -33,7 +33,7 @@ def operacoes():
         rows('Você escolheu Excluir Conta')
       case '7':
         rows('Você escolheu Ver Histórico de Transações')
-        consultar_saldo()
+        # registrar_transacao()
       case '8':
         rows('você escolheu Consultar Saldo')
         consultar_saldo()
