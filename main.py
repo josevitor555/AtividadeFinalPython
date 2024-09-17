@@ -30,7 +30,8 @@ def operacoes():
         rows('Você escolheu Realizar Pix.')
         realizar_pix()
       case '6':
-        rows('Você escolheu Excluir Conta')
+        rows('Você escolheu Encerrar Conta')
+        encerrar_conta()
       case '7':
         rows('Você escolheu Ver Histórico de Transações')
         # registrar_transacao()
