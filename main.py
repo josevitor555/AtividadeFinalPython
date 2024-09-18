@@ -37,9 +37,11 @@ def operacoes():
         ver_historico_transacao()
       case '8':
         rows('você escolheu Consultar Saldo')
+        atualizar_saldo_poupanca()
         consultar_saldo()
       case '9':
-        rows('Você saiu do sistema!')
+        atualizar_saldo_poupanca()
+        rows('Você saiu do sistema! Seus saldos foram atualizados.')
         exit()
       
 operacoes()

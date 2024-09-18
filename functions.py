@@ -151,6 +151,32 @@ def encerrar_conta():
   contas.remove(conta) # removendo a conta atual da lista
   print(f'A conta {tipo_conta} foi encerrada com sucesso.')
 
+def render_conta_poupanca(saldo): # a função terá como argumento o saldo da conta poupança da pessoa
+  taxa_juros = 0.15
+  valor_adicional = saldo
+  
+  rendimento = saldo * taxa_juros + valor_adicional
+  return rendimento
+
+def atualizar_saldo_poupanca():
+  for conta in contas_poupanca:
+    cpf = conta[0]
+    saldo_atual = conta[2]
+    
+    saldo_futuro = render_conta_poupanca(saldo_atual)
+    conta[2] = saldo_futuro
+    
+    transacao = {
+      'tipo': 'rendimento',
+      'valor': saldo_futuro - saldo_atual,
+      'descricao': f'Rendimento de R$ {saldo_futuro - saldo_atual}'
+    }
+    if len(conta) < 4:
+      conta.append([])
+    conta[3].append(transacao)
+    
+    print(f'Conta {cpf} atualizada com saldo futuro de R$ {saldo_futuro}')
+
 def creditar_conta():
   cpf = input('Informe o CPF da conta a ser creditada: ')
   tipo_conta = input('Informe o tipo da conta [corrente/poupanca]: ')
