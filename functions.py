@@ -1,5 +1,6 @@
 
-from list import *
+from utils import *
+from datetime import datetime
 
 def validar_cpf(cpf):
   cpf = cpf.replace(".", "").replace("-", "")
@@ -378,6 +379,39 @@ def criar_conta_poupanca():
   
   print(f'Conta de {nome_titular} criada com sucesso!')
 
+def verificar_limite_pix(cpf, valor_pix): # verificar se o pix excede o limite diário
+  hoje = datetime.now().strftime('%Y-%m-%d')
+  chave = (cpf, hoje)
+  
+  if chave not in transacoes_pix_diarias:
+    transacoes_pix_diarias[chave] = 0.0
+    
+  total_pix_hoje = transacoes_pix_diarias[chave]
+  
+  if total_pix_hoje + valor_pix > limite_pix_diario:
+    print(f'Valor do PIX excede o limite diário de $ {limite_pix_diario} para realizar o PIX de R$ {valor_pix}.')
+    return False
+  return True
+
+def registrar_pix(cpf, valor_pix):
+  hoje = datetime.now().strftime('%Y-%m-%d')
+  chave = (cpf, hoje) # Ex: { ('12345678900', '2024-09-18'): 200 }
+  
+  # transacao = {
+  #   'data': hoje,
+  #   'valor': valor_pix
+  # }
+  
+  if chave in transacoes_pix_diarias: # se a chave existir, siginifica que já houve ou mais PIX realizado para esse cPf na data específica.
+    transacoes_pix_diarias[chave] += valor_pix # ai se a chave existir, adiciona o valor do PIX ao valor total atual armazenado para essa chave.
+  else: # para  a primeira transação do dia para o cpf, criando uma nova entrada no dicionário com a chave (cpf, data) e definindo seu valor como valor_pix.
+    transacoes_pix_diarias[chave] = valor_pix # ex: transacoes_pix_diarias[chave] = 200
+  
+  #Ex: 200 += 300 = 500
+  # Primeira transação: 200
+  # Segunda transação: 300
+  # Ou seja, 200 + 300 = 500
+
 def realizar_pix():
   cpf_origem = input('Informe o CPF da conta de origem: ')
   tipo_conta_origem = input('Informe o tipo da conta de origem [corrente/poupanca]: ')
@@ -394,7 +428,10 @@ def realizar_pix():
   
   if not verificar_saldo_suficiente(cpf_origem, tipo_conta_origem, valor_pix):
     print(f'Saldo insuficente na conta {tipo_conta_origem} para realizar o PIX de R${valor_pix}')
-    
+  
+  if not verificar_limite_pix(cpf_origem, valor_pix):
+    return
+  
   conta_origem_econtrada = False  
   conta_destino_econtrada = False
   # conta_origem = None
@@ -415,7 +452,7 @@ def realizar_pix():
           conta_origem_econtrada = True
           if conta[2] >= valor_pix:
             conta[2] -= valor_pix
-            # conta_origem = conta
+            conta_origem = conta
           break
   
   match tipo_conta_destino:
