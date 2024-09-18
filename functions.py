@@ -53,56 +53,62 @@ def verificar_saldo_suficiente(cpf, tipo_conta, valor):
         
   return False
 
-# def registrar_transacao():
-#   cpf = input('Informe o CPF da conta: ')
-#   tipo_conta = input('Informe o tipo de conta [corrente/poupanca]: ').strip() # se é conta corrente ou poupança
-  
-#   conta_encontrada = False
-#   conta_atual = None
-  
-#   match tipo_conta:
-#     case 'corrente':
-#       for conta in contas_corrente:
-#         if conta[0] == cpf:
-#           conta_encontrada = True
-#           conta_atual = conta
-#           break
-#     case 'poupanca':
-#       for conta in contas_poupanca:
-#         if conta[0] == cpf:
-#           conta_encontrada = True
-#           conta_atual = conta
-#           break
-  
-#   if not conta_encontrada:
-#     print('COnta não encontrada. Verifique o CPF e o tipo de conta.')
-#     return
-  
-#   tipo_transacao = input('Informe o tipo de transação [debitar/creditar/pix]: ').strip()
-  
-#   if tipo_transacao not in ['debitar', 'creditar', 'pix']:
-#     print('Tipo de transação inválida.')
-#     return
-  
-#   try:
-#     valor = float(input('Informe o valor da transação: '))
-#     if valor <= 0:
-#       print('O valor deve ser positivo.')
-#       return
-#   except ValueError: # se caso o suário não registrar um tipo de dado específico.
-#     print('Valor Inválido. Deves ser um número.')
-#     return
-  
-#   transacao = {
-#     'tipo': tipo_transacao,
-#     'valor': valor,
-#     'cpf': cpf,
-#     'descricao': f'{tipo_transacao.capitalize()} de R$ {valor}'
-#   } # Teste: Fazer um em dicionário pra guarda os dados, com seus respectivos atributos
-  
-#   conta_atual[3].append(transacao)
-#   print(f'Transação registrada com sucesso: {transacao['descricao']}')
+def registrar_transacao():        
+  while True:
+    registrar = input('Desejas registrar esta transação? [s/n]: ').strip().lower()
+    match registrar:
+      case 's':
+        tipo = input('Informe o tipo da transação (creditar, debitar, pix): ').strip().lower()
+        try:
+          valor = float(input('Informe o valor da transação: '))
+          if valor <= 0:
+            print('Valor inválido. A transação não pode ser registrada.')
+            return
+        except ValueError:
+          print('Valor inválido. Por favor, insira um número válido.')
+          return
+        
+        cpf = input('Informe o CPF associado à conta: ')
+        tipo_conta = input('Informe o tipo da conta [corrente/poupanca]: ').strip().lower()
+        
+        conta_encontrada = False
+        contas = contas_corrente if tipo_conta == 'corrente' else contas_poupanca
+        
+        for conta in contas:
+          conta_encontrada = True
+          if conta[0] == cpf:
+            conta_encontrada = True
+            if len(conta) < 4:
+              conta.append([])
+          
+            transacao = {
+              'cpf': cpf,
+              'tipo': tipo,
+              'valor': valor,
+              'descricao': f'{tipo.capitalize()} de R$ {valor}'
+            }
+            print('Transação registrada com sucesso.')
+            
+            conta[3].append(transacao)
+            lista_historico_transacoes.append(transacao)
+            break
+        
+        if not conta_encontrada:
+          print(f'Conta {tipo_conta} com CPF {cpf} não foi encontrada.')
+        break
+      case 'n':
+        print('Transação não registrada.')
+        break
+      case _:
+        print('Opção Inválida. Por favor, responda com "s" ou "n"')
 
+def ver_historico_transacao():
+  if not lista_historico_transacoes:
+    print('Nenhuma transação registrada.')
+  else:
+    print('Histórico de transações: ')
+    for transacao in lista_historico_transacoes:
+      print(f'{transacao['descricao']} - CPF: {transacao['cpf']}')
 
 def encerrar_conta():
   cpf = input('Informe o CPF da conta a ser encerrada: ')
@@ -149,6 +155,13 @@ def creditar_conta():
   cpf = input('Informe o CPF da conta a ser creditada: ')
   tipo_conta = input('Informe o tipo da conta [corrente/poupanca]: ')
   
+  try:
+    valor_creditado = float(input('Informe valor a ser creditado: '))
+    if not checar_valor(valor_creditado):
+      return
+  except ValueError as error:
+    print(f'Por favor. Insira apenas número {error}')
+    
   conta_encontrada = False
   conta_atual = None
   
@@ -158,24 +171,21 @@ def creditar_conta():
         if conta[0] == cpf:
           conta_encontrada = True
           conta_atual = conta
+          print('Registre sua Transação')
+          registrar_transacao()
           break
     case 'poupanca':
       for conta in contas_poupanca:
         if conta[0] == cpf:
           conta_encontrada = True
           conta_atual = conta
+          print('Registre sua Transação')
+          registrar_transacao()
           break
   
   if not conta_encontrada:
     print('CPF não encontrado. Verifique o CPF e tente novamente.')
     return
-  
-  try:
-    valor_creditado = float(input('Informe valor a ser creditado: '))
-    if not checar_valor(valor_creditado):
-      return
-  except ValueError as error:
-    print(f'Por favor. Insira apenas número {error}')
   
   conta_atual[2] += valor_creditado
   print(f'Valor de R${valor_creditado} creditado com sucesso na conta de CPF {cpf}.')
@@ -211,7 +221,9 @@ def debitar_conta():
           conta_encontrada = True
           if conta[2] >= valor_debito:
             conta[2] -= valor_debito
-            # registrar_transacao()
+            # conta_atual = conta
+            print('Registre sua Transação')
+            registrar_transacao()
             print(f'Valor de R${valor_debito} debitado com sucesso da conta corrente.')
           else:
             print(f'Saldo insuficiente para realizar débito.')
@@ -221,13 +233,13 @@ def debitar_conta():
           conta_encontrada = True
           if conta[2] >= valor_debito:
             conta[2] -= valor_debito
-            # registrar_transacao()
+            # conta_atual = conta
+            print('Registre sua Transação')
+            registrar_transacao()
             print(f'Valor de R${valor_debito} debitado com sucesso da conta poupança.')
           else:
             print(f'Saldo insuficiente para realizar débito.')
-  
-  
-  # registrar_transacao(conta_atual, 'saque', valor_debito, cpf)
+            
   if not conta_encontrada:
     print(f'Conta {tipo_conta} com CPF {cpf} não foi encontrada.')
 
@@ -359,8 +371,8 @@ def realizar_pix():
     
   conta_origem_econtrada = False  
   conta_destino_econtrada = False
-  conta_origem = None
-  conta_destino = None
+  # conta_origem = None
+  # conta_destino = None
   
   match tipo_conta_origem:
     case 'corrente':
@@ -369,12 +381,7 @@ def realizar_pix():
           conta_origem_econtrada = True
           if conta[2] >= valor_pix:
             conta[2] -= valor_pix
-            conta_origem = conta # Guardar referência para registrar transação depois
-            # registrar_transacao()
-            print(f'Valor de R${valor_pix} transferido via PIX da conta corrente de origem.')
-          else:
-            print('Saldo insuficiente para realizar o PIX.')
-            return
+            # conta_origem = conta
           break    
     case 'poupanca':
       for conta in contas_poupanca:
@@ -382,12 +389,7 @@ def realizar_pix():
           conta_origem_econtrada = True
           if conta[2] >= valor_pix:
             conta[2] -= valor_pix
-            conta_origem = conta # Guardar referência para registrar transação depois
-            # registrar_transacao()
-            print(f'Valor de R${valor_pix} transferido via PIX da conta poupança de origem.')
-          else:
-            print('Saldo insuficiente para realizar o PIX.')
-            return
+            # conta_origem = conta
           break
   
   match tipo_conta_destino:
@@ -396,9 +398,7 @@ def realizar_pix():
         if conta[0] == cpf_destino:
           conta_destino_econtrada = True
           conta[2] += valor_pix
-          conta_destino = conta # Guardar referência para registrar transação depois
-          # registrar_transacao()
-          print(f'Valor de R${valor_pix} recebido via PIX na conta corrente de destino.')
+          # conta_destino = conta
           break
         
     case 'poupanca':
@@ -406,9 +406,7 @@ def realizar_pix():
         if conta[0] == cpf_destino:
           conta_destino_econtrada = True
           conta[2] += valor_pix
-          conta_destino = conta # Guardar referência para registrar transação depois
-          # registrar_transacao()
-          print(f'Valor de R${valor_pix} recebido via PIX na conta poupanca de destino.')
+          # conta_destino = conta
           break
   
   if not conta_origem_econtrada:
@@ -419,12 +417,12 @@ def realizar_pix():
     print(f'Conta de destino {tipo_conta_destino} com CPF {cpf_destino} não foi encontrada.')
     return
   
-  if conta_origem:
-    # registrar_transacao() registrar os detalhes do PIX na conta de origem
-    pass
-  if conta_destino:
-    # registrar_transacao() registrar os detalhes do PIX na conta de destino
-    pass
+  if conta_origem_econtrada and conta_destino_econtrada:
+    print(f'Valor de R$ {valor_pix} transferido via PIX com sucesso.')
+    print('Registre sua Transação')
+    registrar_transacao()
+  else:
+    print('Error na realização do PIX. Verifique as informações e tente novamente.')
 
 def exibir_menu():
   list_menu = {

@@ -1,10 +1,4 @@
-lista_cpf = []
-lista_nomes = []
-lista_tipo_contas = []
-lista_saldos = []
-lista_senhas = []
-lista_agencias = []
-historico = []
+lista_historico_transacoes = []
 
 clientes = []
 contas_corrente = []
